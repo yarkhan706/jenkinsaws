@@ -15,7 +15,7 @@ pipeline {
         // Set environment variables for SSH key and Apache server IP
         SSH_KEY = '/var/lib/jenkins/.ssh/jenkins_key'  // Path to the SSH private key
         SERVER_IP = '44.203.126.229'  // IP of your Apache server
-        GIT_REPO = 'https://github.com/yourusername/yourrepo.git'  // GitHub repository URL
+        GIT_REPO = 'https://github.com/yarkhan706/jenkinsaws'  // GitHub repository URL
         GIT_BRANCH = 'main'  // Branch to pull from
     }
 
