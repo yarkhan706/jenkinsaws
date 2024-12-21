@@ -9,12 +9,20 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    sh '''
-                        ssh -o StrictHostKeyChecking=no ubuntu@44.203.126.229 '
-                            cd /var/www/html &&
-                            sudo git pull origin main
-                        '
-                    '''
+                    // Add error handling
+                    try {
+                        sh '''
+                            set -x  # Enable debug mode
+                            whoami  # Check which user is executing
+                            ssh -v -o StrictHostKeyChecking=no ubuntu@44.203.126.229 '
+                                cd /var/www/html &&
+                                sudo git pull origin main
+                            '
+                        '''
+                    } catch (err) {
+                        echo "Failed to deploy: ${err}"
+                        throw err
+                    }
                 }
             }
         }
@@ -25,7 +33,7 @@ pipeline {
             echo 'Deployment successful!'
         }
         failure {
-            echo 'Deployment failed!'
+            echo 'Deployment failed! Check SSH connection and permissions.'
         }
     }
 }
