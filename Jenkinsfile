@@ -6,8 +6,7 @@ pipeline {
     }
     
     environment {
-        // Specify the path of the private key (stored in Jenkins credentials)
-        SSH_PRIVATE_KEY = credentials('jenkins-ssh-key') // Replace 'jenkins-ssh-key' with your actual Jenkins credential ID
+        SSH_PRIVATE_KEY = credentials('jenkins-ssh-key')  // Ensure this matches your Jenkins SSH credential ID
     }
     
     stages {
@@ -16,18 +15,22 @@ pipeline {
                 checkout scm
             }
         }
-        
+
         stage('Deploy to Apache') {
             steps {
                 script {
-                    // Use the SSH key to deploy to Apache server
-                    sshagent (credentials: ['jenkins-ssh-key']) { // Replace with your credentials ID
+                    // Ensure that the private key is loaded correctly with ssh-agent
+                    sshagent (credentials: ['jenkins-ssh-key']) {  // Use correct credentials ID
                         sh '''
                             set -x  # Enable debug mode
                             whoami  # Check which user is executing
-                            git config --global --add safe.directory /var/www/html
-                            ssh -o StrictHostKeyChecking=no ubuntu@44.203.126.229 '
-                                cd /var/www/html && 
+
+                            # Set git to consider the directory safe
+                            ssh -o StrictHostKeyChecking=no -i /var/lib/jenkins/.ssh/id_rsa ubuntu@44.203.126.229 "git config --global --add safe.directory /var/www/html"
+
+                            # Run the git pull command
+                            ssh -o StrictHostKeyChecking=no -i /var/lib/jenkins/.ssh/id_rsa ubuntu@44.203.126.229 '
+                                cd /var/www/html &&
                                 sudo git pull origin main
                             '
                         '''
