@@ -25,6 +25,7 @@ pipeline {
                         sh '''
                             set -x  # Enable debug mode
                             whoami  # Check which user is executing
+                            git config --global --add safe.directory /var/www/html
                             ssh -o StrictHostKeyChecking=no ubuntu@44.203.126.229 '
                                 cd /var/www/html && 
                                 sudo git pull origin main
