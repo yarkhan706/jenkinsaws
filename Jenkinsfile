@@ -1,34 +1,31 @@
 pipeline {
     agent any
     
-    environment {
-        SSH_CREDENTIALS = 'apache-ssh-key'
-        SERVER_IP = '44.203.126.229'
-    }
-    
     triggers {
         githubPush()
     }
     
     stages {
-        stage('Deploy to Apache') {
+        stage('Deploy') {
             steps {
-                sshagent([SSH_CREDENTIALS]) {
+                script {
                     sh '''
-                        ssh -o StrictHostKeyChecking=no ubuntu@${SERVER_IP} '
-                            cd /var/www/html
+                        ssh -o StrictHostKeyChecking=no ubuntu@44.203.126.229 '
+                            cd /var/www/html &&
                             sudo git pull origin main
                         '
                     '''
                 }
-                echo 'Deployment completed!'
             }
         }
     }
     
     post {
+        success {
+            echo 'Deployment successful!'
+        }
         failure {
-            echo 'Pipeline failed. Please check the logs.'
+            echo 'Deployment failed!'
         }
     }
 }
