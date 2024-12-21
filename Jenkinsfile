@@ -1,53 +1,34 @@
 pipeline {
     agent any
 
+    environment {
+        SSH_CREDENTIALS = 'jenkins-ssh-key'
+        SERVER_IP = '44.203.126.229'
+    }
+    
     triggers {
-        githubPush() // Trigger the pipeline on a GitHub push event
+        githubPush()
     }
 
     stages {
-        stage('Setup SSH Credentials') {
+        stage('Deploy to Apache') {
             steps {
-                script {
-                    // Ensures the Jenkins workspace has access to the SSH key
-                    sshagent(['jenkins-ssh-key']) {
-                        sh 'echo "SSH credentials loaded."'
-                    }
+                sshagent([SSH_CREDENTIALS]) {
+                    sh '''
+                        ssh -o StrictHostKeyChecking=no ubuntu@${SERVER_IP} '
+                            cd /var/www/html
+                            sudo git pull origin main
+                        '
+                    '''
                 }
-            }
-        }
-        
-        stage('Deploy') {
-            steps {
-                script {
-                    // Add error handling to ensure pipeline fails gracefully
-                    try {
-                        sh '''
-                            set -x  # Enable debug mode for better visibility
-                            echo "Current user: $(whoami)"
-                            
-                            # Connect to the remote server and pull the latest code
-                            ssh -o StrictHostKeyChecking=no ubuntu@44.203.126.229 '
-                                cd /var/www/html &&
-                                git status &&
-                                git pull origin main
-                            '
-                        '''
-                    } catch (err) {
-                        echo "Deployment failed due to the following error: ${err}"
-                        throw err
-                    }
-                }
+                echo 'Deployment completed!'
             }
         }
     }
 
     post {
-        success {
-            echo 'Deployment was successful! The latest code is now on the Apache server.'
-        }
         failure {
-            echo 'Deployment failed! Please check the Jenkins logs and SSH connection.'
+            echo 'Pipeline failed. Please check the logs.'
         }
     }
 }
