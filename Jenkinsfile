@@ -17,24 +17,35 @@ pipeline {
         stage('Clone Repository') {
             steps {
                 echo 'Cloning Repository...'
-                checkout scm // Pull the code from the branch
+                checkout scm // Automatically clones the branch being built
             }
         }
         stage('Build') {
             steps {
                 echo 'Building the Project...'
-                // Uncomment and modify the following line for your specific build
-                // sh 'npm install && npm run build' // Example for Node.js projects
-                // sh './mvnw package'             // Example for Maven projects
+                // Add any build steps required for your application
+                // Uncomment and modify the following if needed:
+                // sh 'npm install && npm run build' // For Node.js projects
+                // sh './mvnw package'             // For Maven projects
             }
         }
         stage('Deploy to Apache') {
             steps {
                 echo 'Deploying to Apache Server...'
+                // Ensure only relevant files are copied
                 sh '''
-                scp -r * ubuntu@44.203.126.229:/var/www/html
+                scp -r ./build/* ubuntu@44.203.126.229:/var/www/html
                 '''
+                echo 'Deployment successful!'
             }
+        }
+    }
+    post {
+        always {
+            echo 'Pipeline execution finished.'
+        }
+        failure {
+            echo 'Pipeline failed. Please check the logs.'
         }
     }
 }
