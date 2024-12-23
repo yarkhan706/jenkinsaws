@@ -2,30 +2,33 @@ pipeline {
     agent any
     
     triggers {
-        githubPush() // Trigger pipeline on a GitHub push event
+        githubPush()
     }
     
     environment {
-        SSH_PRIVATE_KEY = credentials('jenkins-ssh-key') // Replace with your Jenkins SSH credential ID
+        SSH_PRIVATE_KEY = credentials('jenkins-ssh-key') // Make sure this matches your Jenkins credential ID
     }
     
     stages {
         stage('GitHub Pull') {
             steps {
                 script {
-                    // Using ssh-agent to manage the private key for SSH
-                    sshagent (credentials: ['jenkins-ssh-key']) { // Use your Jenkins SSH credentials ID
+                    sshagent (credentials: ['jenkins-ssh-key']) { // Use the correct Jenkins SSH credential ID
                         sh '''
-                            # Debugging information
                             set -x
                             echo "Running as user: $(whoami)"
 
-                            # Define the SSH options for secure and non-interactive login
-                            SSH_OPTIONS="-o StrictHostKeyChecking=no -i /var/lib/jenkins/.ssh/id_rsa"
+                            # Use the correct SSH private key location
+                            SSH_OPTIONS="-o StrictHostKeyChecking=no -i /home/ubuntu/.ssh/id_rsa"
 
-                            # Login to the remote server and execute the git pull command
+                            # Log in to the remote server and pull changes
                             ssh $SSH_OPTIONS ubuntu@44.203.126.229 "
                                 cd /var/www/html &&
+                                
+                                # Handle uncommitted changes to avoid conflicts
+                                git stash || git reset --hard &&
+                                
+                                # Pull the latest code from GitHub
                                 git config --global --add safe.directory /var/www/html &&
                                 git pull origin main
                             "
