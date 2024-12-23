@@ -2,37 +2,33 @@ pipeline {
     agent any
     
     triggers {
-        githubPush()
+        githubPush() // Trigger pipeline on a GitHub push event
     }
     
     environment {
-        SSH_PRIVATE_KEY = credentials('jenkins-ssh-key')  // Ensure this matches your Jenkins SSH credential ID
+        SSH_PRIVATE_KEY = credentials('jenkins-ssh-key') // Replace with your Jenkins SSH credential ID
     }
     
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
-        stage('Deploy to Apache') {
+        stage('GitHub Pull') {
             steps {
                 script {
-                    // Ensure that the private key is loaded correctly with ssh-agent
-                    sshagent (credentials: ['jenkins-ssh-key']) {  // Use correct credentials ID
+                    // Using ssh-agent to manage the private key for SSH
+                    sshagent (credentials: ['jenkins-ssh-key']) { // Use your Jenkins SSH credentials ID
                         sh '''
-                            set -x  # Enable debug mode
-                            whoami  # Check which user is executing
+                            # Debugging information
+                            set -x
+                            echo "Running as user: $(whoami)"
 
-                            # Set git to consider the directory safe
-                            ssh -o StrictHostKeyChecking=no -i /var/lib/jenkins/.ssh/id_rsa ubuntu@44.203.126.229 "git config --global --add safe.directory /var/www/html"
+                            # Define the SSH options for secure and non-interactive login
+                            SSH_OPTIONS="-o StrictHostKeyChecking=no -i /var/lib/jenkins/.ssh/id_rsa"
 
-                            # Run the git pull command
-                            ssh -o StrictHostKeyChecking=no -i /var/lib/jenkins/.ssh/id_rsa ubuntu@44.203.126.229 '
+                            # Login to the remote server and execute the git pull command
+                            ssh $SSH_OPTIONS ubuntu@44.203.126.229 "
                                 cd /var/www/html &&
-                                sudo git pull origin main
-                            '
+                                git config --global --add safe.directory /var/www/html &&
+                                git pull origin main
+                            "
                         '''
                     }
                 }
@@ -42,10 +38,10 @@ pipeline {
     
     post {
         success {
-            echo 'Deployment successful!'
+            echo 'GitHub pull operation completed successfully!'
         }
         failure {
-            echo 'Deployment failed! Check SSH connection and permissions.'
+            echo 'GitHub pull operation failed! Check SSH connection and permissions.'
         }
     }
 }
