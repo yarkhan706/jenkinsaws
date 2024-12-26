@@ -17,7 +17,7 @@ pipeline {
                         sh '''
                             set -x
                             echo "Pulling latest code from GitHub"
-                            ssh -o StrictHostKeyChecking=no -i $SSH_PRIVATE_KEY ubuntu@3.94.179.249 "
+                            ssh -o StrictHostKeyChecking=no -i $SSH_PRIVATE_KEY ubuntu@3.83.12.130 "
                                 cd /var/www/html &&
                                 git stash || git reset --hard &&
                                 git pull origin main
@@ -35,7 +35,7 @@ pipeline {
                         sh '''
                             set -x
                             echo "Installing dependencies"
-                            ssh -o StrictHostKeyChecking=no -i $SSH_PRIVATE_KEY ubuntu@3.94.179.249 "
+                            ssh -o StrictHostKeyChecking=no -i $SSH_PRIVATE_KEY ubuntu@3.83.12.130 "
                                 cd /var/www/html &&
                                 npm install
                             "
@@ -52,7 +52,7 @@ pipeline {
                         sh '''
                             set -x
                             echo "Building the application"
-                            ssh -o StrictHostKeyChecking=no -i $SSH_PRIVATE_KEY ubuntu@3.94.179.249 "
+                            ssh -o StrictHostKeyChecking=no -i $SSH_PRIVATE_KEY ubuntu@3.83.12.130 "
                                 cd /var/www/html &&
                                 npm run build
                             "
@@ -69,7 +69,7 @@ pipeline {
                         sh '''
                             set -x
                             echo "Restarting the application with PM2"
-                            ssh -o StrictHostKeyChecking=no -i $SSH_PRIVATE_KEY ubuntu@3.94.179.249 "
+                            ssh -o StrictHostKeyChecking=no -i $SSH_PRIVATE_KEY ubuntu@3.83.12.130 "
                                 pm2 stop estore-app || true &&
                                 pm2 start npm --name 'estore-app' -- start
                             "
