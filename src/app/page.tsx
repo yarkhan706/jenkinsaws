@@ -15,7 +15,7 @@ export default async function Home() {
       {/* Hero Section */}
       <section className="bg-bg text-foreground flex justify-between items-center mx-5">
         <div>
-          <h1 className="text-4xl font-bold mb-4">Welcome to E-Store.Hi!</h1>
+          <h1 className="text-4xl font-bold mb-4">Welcome to E-Store.Hi!!!!</h1>
           <p className="text-lg mb-6">
             Shop the latest products at unbeatable prices.
           </p>
