@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Product } from "./products/[id]/page";
 
 export const metadata = {
   title: "Home - E-Store",
@@ -33,7 +34,7 @@ export default async function Home() {
       <section className="py-10">
         <h2 className="text-3xl font-bold mx-5 mb-8">Featured Products</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {featuredProducts.map((product: any) => (
+          {featuredProducts.map((product: Product) => (
             <a
               key={product.id}
               href={`/products/${product.id}`}

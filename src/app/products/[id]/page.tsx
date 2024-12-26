@@ -8,7 +8,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/cart-context";
 
-type Product = {
+export type Product = {
   id: number;
   title: string;
   price: number;
