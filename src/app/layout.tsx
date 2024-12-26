@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
+import { ModeToggle } from "@/components/ModeToggle";
+import { CartProvider } from "@/context/cart-context";
+import ShoppingIcon from "@/components/shopping-icon";
+import Link from "next/link";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,11 +28,33 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
       >
-        {children}
+        <CartProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <header className="p-2 ">
+              <div className="container mx-auto flex justify-between items-center border-primary p-2">
+                <h1 className="text-2xl font-bold">E-Store</h1>
+                <div className="flex gap-4 items-center">
+                  <Link href={"/"} className="hover:underline">
+                    Home
+                  </Link>
+                  <ShoppingIcon />
+                  <ModeToggle />
+                </div>
+              </div>
+            </header>
+            {children}
+          </ThemeProvider>
+        </CartProvider>
       </body>
     </html>
   );
