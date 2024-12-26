@@ -7,7 +7,8 @@ pipeline {
 
     environment {
         SSH_PRIVATE_KEY = credentials('jenkins-ssh-key')  // Ensure this matches your Jenkins credential ID for SSH access
-        SSH_KEY_PATH = "/home/ubuntu/.ssh/id_rsa"  // Set the correct SSH private key path
+        SSH_KEY_PATH = "/home/ubuntu/.ssh/id_rsa"  // Path to your private SSH key
+        REMOTE_HOST = "ubuntu@3.94.179.249"  // The correct server address
     }
 
     stages {
@@ -23,7 +24,7 @@ pipeline {
                             SSH_OPTIONS="-o StrictHostKeyChecking=no -i ${SSH_KEY_PATH}"
 
                             # Log in to the remote server and pull the latest changes
-                            ssh $SSH_OPTIONS ubuntu@44.203.126.229 "
+                            ssh $SSH_OPTIONS ${REMOTE_HOST} "
                                 cd /var/www/html &&
                                 
                                 # Handle any uncommitted changes to avoid conflicts
@@ -48,7 +49,7 @@ pipeline {
                             echo "Installing dependencies on remote server"
 
                             # Log in to the remote server and install dependencies
-                            ssh -o StrictHostKeyChecking=no -i ${SSH_KEY_PATH} ubuntu@44.203.126.229 "
+                            ssh -o StrictHostKeyChecking=no -i ${SSH_KEY_PATH} ${REMOTE_HOST} "
                                 cd /var/www/html &&
                                 npm install
                             "
@@ -67,7 +68,7 @@ pipeline {
                             echo "Building the Next.js application"
 
                             # Log in to the remote server and build the Next.js app
-                            ssh -o StrictHostKeyChecking=no -i ${SSH_KEY_PATH} ubuntu@44.203.126.229 "
+                            ssh -o StrictHostKeyChecking=no -i ${SSH_KEY_PATH} ${REMOTE_HOST} "
                                 cd /var/www/html &&
                                 npm run build
                             "
@@ -86,7 +87,7 @@ pipeline {
                             echo "Restarting Apache to serve the updated app"
 
                             # Log in to the remote server and restart Apache
-                            ssh -o StrictHostKeyChecking=no -i ${SSH_KEY_PATH} ubuntu@44.203.126.229 "
+                            ssh -o StrictHostKeyChecking=no -i ${SSH_KEY_PATH} ${REMOTE_HOST} "
                                 sudo systemctl restart apache2
                             "
                         '''
