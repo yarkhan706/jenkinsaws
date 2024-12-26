@@ -1,14 +1,14 @@
 pipeline {
     agent any
-
+    
     triggers {
         githubPush()
     }
-
+    
     environment {
-        SSH_PRIVATE_KEY = credentials('jenkins-ssh-key') // Replace with your actual Jenkins SSH credential ID
+        SSH_PRIVATE_KEY = credentials('jenkins-ssh-key') // Your Jenkins SSH key ID
     }
-
+    
     stages {
         stage('GitHub Pull') {
             steps {
@@ -16,7 +16,7 @@ pipeline {
                     sshagent (credentials: ['jenkins-ssh-key']) {
                         sh '''
                             set -x
-                            echo "Pulling latest code from GitHub"
+                            echo "Pulling latest code from GitHub..."
                             ssh -o StrictHostKeyChecking=no -i $SSH_PRIVATE_KEY ubuntu@3.83.12.130 "
                                 cd /var/www/html &&
                                 git stash || git reset --hard &&
@@ -27,14 +27,14 @@ pipeline {
                 }
             }
         }
-
+        
         stage('Install Dependencies') {
             steps {
                 script {
                     sshagent (credentials: ['jenkins-ssh-key']) {
                         sh '''
                             set -x
-                            echo "Installing dependencies"
+                            echo "Installing dependencies on the remote server..."
                             ssh -o StrictHostKeyChecking=no -i $SSH_PRIVATE_KEY ubuntu@3.83.12.130 "
                                 cd /var/www/html &&
                                 npm install
@@ -44,14 +44,14 @@ pipeline {
                 }
             }
         }
-
+        
         stage('Build Application') {
             steps {
                 script {
                     sshagent (credentials: ['jenkins-ssh-key']) {
                         sh '''
                             set -x
-                            echo "Building the application"
+                            echo "Building the Next.js application..."
                             ssh -o StrictHostKeyChecking=no -i $SSH_PRIVATE_KEY ubuntu@3.83.12.130 "
                                 cd /var/www/html &&
                                 npm run build
@@ -61,17 +61,19 @@ pipeline {
                 }
             }
         }
-
+        
         stage('Restart Application') {
             steps {
                 script {
                     sshagent (credentials: ['jenkins-ssh-key']) {
                         sh '''
                             set -x
-                            echo "Restarting the application with PM2"
+                            echo "Restarting the application using PM2..."
                             ssh -o StrictHostKeyChecking=no -i $SSH_PRIVATE_KEY ubuntu@3.83.12.130 "
-                                pm2 stop estore-app || true &&
-                                pm2 start npm --name 'estore-app' -- start
+                                pm2 delete estore-app || true &&
+                                cd /var/www/html &&
+                                pm2 start npm --name 'estore-app' -- start &&
+                                pm2 save
                             "
                         '''
                     }
@@ -79,13 +81,13 @@ pipeline {
             }
         }
     }
-
+    
     post {
         success {
-            echo 'Deployment completed successfully!'
+            echo 'Deployment pipeline executed successfully!'
         }
         failure {
-            echo 'Deployment failed. Please check the logs.'
+            echo 'Deployment pipeline failed! Check the logs for more details.'
         }
     }
 }
